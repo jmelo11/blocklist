@@ -1,18 +1,18 @@
 use std::ptr::NonNull;
 
 use crate::{
-    datablock2::DataBlock2,
-    linkedlist2::{LinkedList2, Node2},
+    arraylike::ArrayLike,
+    linkedlist::{LinkedList, Node},
     ptrbased::PtrBased,
 };
 
 pub struct SmallObjectPool<T, const CAP: usize> {
-    data: LinkedList2<DataBlock2<T, CAP>>,
-    current_block: NonNull<Node2<DataBlock2<T, CAP>>>,
-    last_block: NonNull<Node2<DataBlock2<T, CAP>>>,
+    data: LinkedList<ArrayLike<T, CAP>>,
+    current_block: NonNull<Node<ArrayLike<T, CAP>>>,
+    last_block: NonNull<Node<ArrayLike<T, CAP>>>,
     next_space: NonNull<T>,
     last_space: NonNull<T>,
-    marked_block: NonNull<Node2<DataBlock2<T, CAP>>>,
+    marked_block: NonNull<Node<ArrayLike<T, CAP>>>,
     marked_space: NonNull<T>,
 }
 
@@ -58,8 +58,8 @@ impl<T> PtrBased for Vec<T> {
 
 impl<T: Clone + Copy, const CAP: usize> SmallObjectPool<T, CAP> {
     pub fn new() -> Self {
-        let mut data = LinkedList2::new();
-        data.push_back(DataBlock2::new());
+        let mut data = LinkedList::new();
+        data.push_back(ArrayLike::new());
         let mut sop = SmallObjectPool {
             data: data,
             current_block: NonNull::dangling(),
@@ -85,7 +85,7 @@ impl<T: Clone + Copy, const CAP: usize> SmallObjectPool<T, CAP> {
     }
 
     fn new_block(&mut self) {
-        self.data.push_back(DataBlock2::new());
+        self.data.push_back(ArrayLike::new());
         self.last_block = self.data.end().unwrap();
         unsafe {
             self.current_block = self.last_block;

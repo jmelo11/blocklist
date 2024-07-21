@@ -1,11 +1,6 @@
-pub mod adnum;
-pub mod datablock;
-pub mod datablock2;
+pub mod arraylike;
 pub mod linkedlist;
-pub mod linkedlist2;
 pub mod node;
-pub mod pool;
 pub mod prelude;
 pub mod ptrbased;
 pub mod smallobjectpool;
-pub mod tape;

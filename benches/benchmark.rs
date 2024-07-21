@@ -1,102 +1,83 @@
 use blocklist::{
-    datablock::DataBlock, datablock2::DataBlock2, linkedlist::LinkedList, linkedlist2::LinkedList2,
-    pool::Pool2, ptrbased::PtrBased, smallobjectpool::SmallObjectPool,
+    arraylike::ArrayLike, linkedlist::LinkedList, ptrbased::PtrBased,
+    smallobjectpool::SmallObjectPool,
 };
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
-const BLOCK_SIZE: usize = 1024 * 10;
-const ITERS: i32 = 100000;
+const BLOCK_SIZE: usize = 1024;
+const ITERS: i32 = 1024 * 10;
 type DTYPE = f64;
 
-pub fn datablock_push_benchmark(c: &mut Criterion) {
-    c.bench_function("array push", |b| {
-        let mut list: DataBlock<f64, BLOCK_SIZE> = DataBlock::new();
+pub fn array_like_direct_insert_benchmark(c: &mut Criterion) {
+    c.bench_function("array direct insert", |b| {
         b.iter(|| {
-            for i in 0..ITERS {
-                list.insert(i as usize, black_box(i as DTYPE));
+            let list: ArrayLike<DTYPE, BLOCK_SIZE> = ArrayLike::new();
+            let mut ptr = list.begin().unwrap();
+            for i in 0..BLOCK_SIZE {
+                unsafe {
+                    ptr.as_ptr().write(i as DTYPE);
+                    ptr = list.next(ptr).unwrap();
+                }
             }
-        })
-    });
-}
-
-pub fn datablock2_push_benchmark(c: &mut Criterion) {
-    c.bench_function("array 2 push", |b| {
-        let mut list: DataBlock2<f64, BLOCK_SIZE> = DataBlock2::new();
-        b.iter(|| {
-            for i in 0..ITERS {
-                list.insert(i as usize, black_box(i as DTYPE));
-            }
+            black_box(list);
         })
     });
 }
 
 pub fn vec_push_benchmark(c: &mut Criterion) {
     c.bench_function("vec push", |b| {
-        let mut vec: Vec<DTYPE> = Vec::new();
         b.iter(|| {
-            for i in 0..ITERS {
+            let mut vec: Vec<DTYPE> = Vec::new();
+            for i in 0..BLOCK_SIZE {
                 vec.push(i as DTYPE);
             }
+            black_box(vec);
         });
-        black_box(vec);
     });
 }
 
 pub fn linked_list_push_benchmark(c: &mut Criterion) {
     c.bench_function("linked list push", |b| {
-        let mut vec: LinkedList<DTYPE> = LinkedList::new();
         b.iter(|| {
+            let mut vec: LinkedList<DTYPE> = LinkedList::new();
             for i in 0..ITERS {
                 vec.push_back(i as DTYPE);
             }
+            black_box(vec);
         });
-        black_box(vec);
-    });
-}
-
-pub fn linked_list_2_push_benchmark(c: &mut Criterion) {
-    c.bench_function("linked list 2 push", |b| {
-        let mut vec: LinkedList2<DTYPE> = LinkedList2::new();
-        b.iter(|| {
-            for i in 0..ITERS {
-                vec.push_back(i as DTYPE);
-            }
-        });
-        black_box(vec);
     });
 }
 
 pub fn sop_push_benchmark(c: &mut Criterion) {
     c.bench_function("sop push", |b| {
-        let mut list: SmallObjectPool<DTYPE, BLOCK_SIZE> = SmallObjectPool::new();
         b.iter(|| {
+            let mut list: SmallObjectPool<DTYPE, BLOCK_SIZE> = SmallObjectPool::new();
             for i in 0..ITERS {
                 list.push(i as DTYPE);
             }
+            black_box(list);
         });
-        black_box(list);
     });
 }
 
-pub fn pool_push_benchmark(c: &mut Criterion) {
-    c.bench_function("pool push", |b| {
-        let mut blocklist: Pool2<DTYPE, BLOCK_SIZE> = Pool2::new();
+pub fn vec_high_vol_push_benchmark(c: &mut Criterion) {
+    c.bench_function("vec high volume push", |b| {
         b.iter(|| {
+            let mut vec: Vec<DTYPE> = Vec::new();
             for i in 0..ITERS {
-                blocklist.push(i as DTYPE);
+                vec.push(i as DTYPE);
             }
+            black_box(vec);
         });
-        black_box(blocklist);
     });
 }
 
 criterion_group!(
     benches,
-    sop_push_benchmark,
-    // datablock_push_benchmark,
-    // datablock2_push_benchmark,
     vec_push_benchmark,
-    // linked_list_push_benchmark,
-    // linked_list_2_push_benchmark,
+    array_like_direct_insert_benchmark,
+    sop_push_benchmark,
+    linked_list_push_benchmark,
+    vec_high_vol_push_benchmark
 );
 criterion_main!(benches);
