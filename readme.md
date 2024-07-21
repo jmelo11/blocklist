@@ -1,4 +1,4 @@
-# BlockList
+# SmallObjectPool
 
 A rust implementation of a block list, a data structure described in the book "Modern Computational Finance: AAD and Parallel Simulations" by Antoine Savine.
 The repo contains the following implementations:
