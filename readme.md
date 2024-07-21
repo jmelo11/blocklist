@@ -25,15 +25,14 @@ fn main() {
 
 In terms of performance, the `SmallObjectPool` achieves close performance to a `Vec`, but still the latter is faster. In this case, the benefit of the `SmallObjectPool` will come from a smaller footprint in memory, as it doesn't need to allocate memory for each element after the capacity is reached.
 
-| Operation             | Time (ns or µs)             | Outliers                                |
+| Operation             | Avg Time (ns or µs)             | Outliers                                |
 |-----------------------|-----------------------------|-----------------------------------------|
-| vec push              | [914.10 ns 932.30 ns 951.79 ns] | None                                    |
-| array direct insert   | [325.95 ns 326.35 ns 326.86 ns] | 15 outliers (3 high mild, 12 high severe) |
-| sop push              | [18.123 µs 18.534 µs 19.071 µs] | 17 outliers (9 low mild, 5 high mild, 3 high severe) |
-| linked list push      | [219.47 µs 220.50 µs 221.56 µs] | 6 outliers (3 high mild, 3 high severe)  |
-| vec high volume push  | [15.951 µs 16.383 µs 16.775 µs] | None                                    |
+| vec push              | 932.30 ns | None                                    |
+| array direct insert   | 326.35 ns | 15 outliers (3 high mild, 12 high severe) |
+| sop push              | 18.534 µs | 17 outliers (9 low mild, 5 high mild, 3 high severe) |
+| linked list push      | 220.50 µs | 6 outliers (3 high mild, 3 high severe)  |
+| vec high volume push  | 16.383 µs | None                                    |
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
-```
