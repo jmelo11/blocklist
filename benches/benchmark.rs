@@ -1,8 +1,8 @@
-use blocklist::{
+use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use smallobjectpool::{
     arraylike::ArrayLike, linkedlist::LinkedList, ptrbased::PtrBased,
     smallobjectpool::SmallObjectPool,
 };
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
 const BLOCK_SIZE: usize = 1024;
 const ITERS: i32 = 1024 * 10;

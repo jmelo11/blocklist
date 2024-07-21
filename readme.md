@@ -11,7 +11,7 @@ The repo contains the following implementations:
 ## Usage
 
 ```rust
-use block_list::SmallObjectPool;
+use smallobjectpool::SmallObjectPool;
 
 fn main() {
     let mut sop = SmallObjectPool::<u32, 4>::new();
