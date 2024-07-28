@@ -2,6 +2,12 @@
 name = "smallobjectpool"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+description = "A small object pool for Rust"
+repository = "https://github.com/jmelo11/smallobjectpool"
+readme = "readme.md"
+homepage = "https://github.com/jmelo11/smallobjectpool"
+
 
 [dependencies]
 
