@@ -140,6 +140,21 @@ impl<T: Clone + Copy, const CAP: usize> SmallObjectPool<T, CAP> {
         }
     }
 
+    pub unsafe fn push_to_ptr(&mut self, value: T) -> NonNull<T> {
+        if self.next_space == self.last_space {
+            self.next_block();
+        }
+        self.next_space.as_ptr().write(value);
+        let ptr = self.next_space;
+        self.next_space = self
+            .current_block
+            .as_ref()
+            .inner()
+            .next(self.next_space)
+            .unwrap();
+        ptr
+    }
+
     pub unsafe fn emplace_back(&mut self) -> NonNull<T> {
         if self.next_space == self.last_space {
             self.next_block();
