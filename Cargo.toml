@@ -8,7 +8,6 @@ repository = "https://github.com/jmelo11/smallobjectpool"
 readme = "readme.md"
 homepage = "https://github.com/jmelo11/smallobjectpool"
 
-
 [dependencies]
 
 [dev-dependencies]

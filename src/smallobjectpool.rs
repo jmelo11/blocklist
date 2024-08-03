@@ -56,7 +56,7 @@ impl<T> PtrBased for Vec<T> {
     }
 }
 
-impl<T: Clone + Copy, const CAP: usize> SmallObjectPool<T, CAP> {
+impl<T: Clone + Copy + Default, const CAP: usize> SmallObjectPool<T, CAP> {
     pub fn new() -> Self {
         let mut data = LinkedList::new();
         data.push_back(ArrayLike::new());
@@ -73,6 +73,7 @@ impl<T: Clone + Copy, const CAP: usize> SmallObjectPool<T, CAP> {
         sop
     }
 
+    /// Initialize the pool
     fn init(&mut self) {
         self.current_block = self.data.begin().unwrap();
         self.marked_block = self.current_block;
@@ -84,6 +85,7 @@ impl<T: Clone + Copy, const CAP: usize> SmallObjectPool<T, CAP> {
         }
     }
 
+    /// Create a new block
     fn new_block(&mut self) {
         self.data.push_back(ArrayLike::new());
         self.last_block = self.data.end().unwrap();
@@ -94,6 +96,7 @@ impl<T: Clone + Copy, const CAP: usize> SmallObjectPool<T, CAP> {
         }
     }
 
+    /// Move to the next block
     fn next_block(&mut self) {
         if self.current_block == self.last_block {
             self.new_block();
@@ -106,6 +109,7 @@ impl<T: Clone + Copy, const CAP: usize> SmallObjectPool<T, CAP> {
         }
     }
 
+    /// Move to the previous block
     pub fn rewind(&mut self) {
         self.current_block = self.data.begin().unwrap();
         unsafe {
@@ -114,11 +118,13 @@ impl<T: Clone + Copy, const CAP: usize> SmallObjectPool<T, CAP> {
         }
     }
 
+    /// Mark the current block and space
     pub fn mark(&mut self) {
         self.marked_block = self.current_block;
         self.marked_space = self.next_space;
     }
 
+    /// Rewind to the marked block and space
     pub fn push(&mut self, value: T) {
         unsafe {
             if self.next_space == self.last_space {
@@ -132,6 +138,36 @@ impl<T: Clone + Copy, const CAP: usize> SmallObjectPool<T, CAP> {
                 .next(self.next_space)
                 .unwrap();
         }
+    }
+
+    pub unsafe fn emplace_back(&mut self) -> NonNull<T> {
+        if self.next_space == self.last_space {
+            self.next_block();
+        }
+        let ptr = self.next_space;
+        self.next_space = self
+            .current_block
+            .as_ref()
+            .inner()
+            .next(self.next_space)
+            .unwrap();
+        ptr
+    }
+
+    pub unsafe fn emplace_back_multi<const N: usize>(&mut self) -> NonNull<T> {
+        if self
+            .current_block
+            .as_ref()
+            .inner()
+            .distance(self.next_space, self.last_space)
+            < N
+        {
+            self.next_block();
+        }
+
+        let ptr = self.next_space;
+        self.next_space = self.next_space.add(N);
+        ptr
     }
 }
 
@@ -162,6 +198,18 @@ mod tests {
     #[test]
     fn test_small_object_pool() {
         let mut sop = SmallObjectPool::<u32, 4>::new();
+        for i in 0..8 {
+            sop.push(i);
+        }
+    }
+
+    #[test]
+    fn test_small_object_pool_rewind() {
+        let mut sop = SmallObjectPool::<u32, 4>::new();
+        for i in 0..8 {
+            sop.push(i);
+        }
+        sop.rewind();
         for i in 0..8 {
             sop.push(i);
         }
