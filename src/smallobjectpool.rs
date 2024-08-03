@@ -56,7 +56,7 @@ impl<T> PtrBased for Vec<T> {
     }
 }
 
-impl<T: Clone + Copy + Default, const CAP: usize> SmallObjectPool<T, CAP> {
+impl<T: Clone + Copy, const CAP: usize> SmallObjectPool<T, CAP> {
     pub fn new() -> Self {
         let mut data = LinkedList::new();
         data.push_back(ArrayLike::new());
